@@ -114,6 +114,8 @@ abrir_menu_plantas :-
     
     
     
+    new(BuscarPorEfecto, button('DICCIONARIO Y BUSQUEDA POR EFECTO EN EL CUERPO', message(@prolog, buscarPorEfecto))),
+    
     
     
     new(BotonAbrojo, button('Abrojo', message(@prolog, pp, abrojo))),
@@ -218,7 +220,11 @@ abrir_menu_plantas :-
     
     new(BotonVolver, button('VOLVER', message(@prolog, regresar_principal, Menu_plantas))),
     send(Menu_plantas, display, new(_, BotonVolver), point(450, 270)),
+
+    send(Menu_plantas, display, new(_, BuscarPorEfecto), point(20,270)),
+    
     send(Menu_plantas, open_centered).
+
 
 %Predicado para crear la ventana de la planta especifica que mandemos
 pp(Pld) :-
@@ -259,8 +265,13 @@ pp(Pld) :-
     send(D, display, new(_, text('Precaucion:', left, bold)), point(350, 130)),
     mostrar_items(ListaPrecaucion, D, 350, 150),
 
+    findall(Preparacion, modo_preparacion(Pld, Preparacion), ListaPreparacion),
+    send(D, display, new(_, text('Modo Preparacion:', left, bold)), point(350, 260)),
+    mostrar_items(ListaPreparacion, D, 370, 280),
 
-
+    findall(Dosis, modo_tratamiento(Pld, Dosis), ListaDosis),
+    send(D, display, new(_, text('Modo tratamiento:', left, bold)), point(550, 260)),
+    mostrar_items(ListaDosis, D, 570, 280),
 
     send(D, open, point(200, 200)).
 
@@ -362,6 +373,41 @@ mostrar_items([X|Xs], D, Xpos, Ypos) :-
     send(E, display, new(_, text(X, left, normal)), point(Xpos, Ypos)),
     Ynext is Ypos + 20,
     mostrar_items(Xs, D, Xpos, Ynext).
+
+
+buscarPorEfecto :-
+    new(BuscarPorEfecto, dialog('BUSCAR POR EFECTO', size(1600, 1600))),
+
+    new(Efecto, text_item('¿Que efecto quieres buscar?')),
+    send(BuscarPorEfecto, append, Efecto),
+
+    new(BotonBuscar, button('Buscar', message(@prolog, mostrarPlantasPorEfecto, Efecto))),
+    send(BuscarPorEfecto, append, BotonBuscar),
+
+    send(BuscarPorEfecto, open_centered).
+
+mostrarPlantasPorEfecto(Efecto) :- 
+
+    get(Efecto, value, Efec),
+    new(D, dialog(Efec)),
+    send(D, size, size(600, 900)),
+    send(D, background, colour(white)),
+
+
+    send(D, display, new(_, text('Plantas', left, bold)), point(20, 10)),
+    send(D, display, new(_, text(Efec, left, bold)), point(20, 40)),
+
+    findall(Planta, accion_efecto_planta(Planta, Efec), Plantas),
+    send(D, display, new(_, text('Plantas que tienen este efecto:', left, bold)), point(20, 60)),
+    mostrar_items(Plantas, D, 40, 80),
+
+    send(D, display, new(_, text('Definicion del efecto', left, bold)), point(130, 10)),
+    findall(Descripcion, descripcionEfecto(Descripcion, Efec), Descripciones),
+    mostrar_items(Descripciones, D, 140, 30),
+    send(D, open, point(200, 200)).
+
+
+
 
 
 regresar_principal(D) :-
@@ -1398,7 +1444,7 @@ sintoma_enfermedad(gastritis, acidez_estomacal).
 sintoma_enfermedad(eczema, picazon_piel).
 sintoma_enfermedad(faringitis, dolor_garganta).
 sintoma_enfermedad(ciatica, dolor_pierna).
-sintoma_enfermedad(leishmaniasis, ulceras_piel).
+sintoma_enfermedad(leishmaniasis, ulceras_piel). 
 sintoma_enfermedad(diarrea_cronica, deshidratacion).
 sintoma_enfermedad(hemorragias, sangrado_excesivo).
 sintoma_enfermedad(infecciones_cutaneas, pus_piel).
@@ -2326,7 +2372,7 @@ iman('alcachofa','C:/EL_YERBERITO/assets/alcachofa.jpeg').
 iman('alcanfor','C:/EL_YERBERITO/assets/alcantar.jpg').
 iman('amapola_amarilla','C:/EL_YERBERITO/assets/amapolaAmarilla.jpg').
 iman('amate','C:/EL_YERBERITO/assets/amate.jpg').
-iman('anacahuite','C:/EL_YERBERITO/assets/Anacahuite.png').
+iman('anacahuite','C:/EL_YERBERITO/assets/Anacahuite.jpg').
 iman('anis','C:/EL_YERBERITO/assets/anis.jpg').
 iman('arnica','C:/EL_YERBERITO/assets/Arnica.png').
 iman('barbasco','C:/EL_YERBERITO/assets/Barbasco.jpeg').
@@ -2427,3 +2473,64 @@ iman('toloache','C:/EL_YERBERITO/assets/toloache.jpeg').
 iman('tripa_de_judas','C:/EL_YERBERITO/assets/tripa_de_judas.jpeg').
 iman('tronadora','C:/EL_YERBERITO/assets/tronadora.jpeg').
 iman('uva','C:/EL_YERBERITO/assets/uva.jpeg').
+
+descripcionEfecto('Aumenta la resistencia del organismo al estrés, la fatiga y las enfermedades', adaptogeno).
+descripcionEfecto('Proporciona nutrientes o complementa la dieta', alimenticio).
+descripcionEfecto('Alivia o reduce el dolor sin pérdida de conciencia', analgesico).
+descripcionEfecto('Reduce la ansiedad y la tensión nerviosa', ansiolitico).
+descripcionEfecto('Neutraliza el ácido gástrico, alivia la acidez', antiacido).
+descripcionEfecto('Alivia síntomas de artritis o inflamación articular', antiartritico).
+descripcionEfecto('Ayuda a controlar o prevenir ataques de asma', antiasmatico).
+descripcionEfecto('Mata o inhibe el crecimiento de bacterias', antibacteriano).
+descripcionEfecto('Previene infecciones al inhibir microorganismos patógenos', antiseptico).
+descripcionEfecto('Relaja músculos y calma espasmos o calambres', antiespasmodico).
+descripcionEfecto('Reduce inflamaciones en tejidos o articulaciones', antiinflamatorio).
+descripcionEfecto('Actúa contra microbios (bacterias, hongos, virus)', antimicrobiano).
+descripcionEfecto('Protege células del daño por radicales libres', antioxidante).
+descripcionEfecto('Combate parásitos internos o externos', antiparasitario).
+descripcionEfecto('Reduce la fiebre', antipiretico).
+descripcionEfecto('Suprime o alivia la tos', antitusivo).
+descripcionEfecto('Inhibe la replicación de virus', antiviral).
+descripcionEfecto('Contrae tejidos, reduce secreciones o sangrados', astringente).
+descripcionEfecto('Alivia irritaciones en vías respiratorias o piel', balsamico).
+descripcionEfecto('Dilata los bronquios, mejora flujo de aire', broncodilatador).
+descripcionEfecto('Tranquiliza el sistema nervioso o irritaciones locales', calmante).
+descripcionEfecto('Fortalece o regula la función cardíaca', cardiotonico).
+descripcionEfecto('Facilita la expulsión de gases intestinales', carminativo).
+descripcionEfecto('Acelera la curación de heridas o úlceras', cicatrizante).
+descripcionEfecto('Estimula la producción o secreción de bilis', colagogo).
+descripcionEfecto('Purifica la sangre o elimina toxinas', depurativo).
+descripcionEfecto('Protege tejidos irritados (mucosas, piel)', demulcente).
+descripcionEfecto('Alivia congestión nasal o respiratoria', descongestionante).
+descripcionEfecto('Disminuye hinchazón o inflamación', desinflamatorio).
+descripcionEfecto('Ayuda a eliminar sustancias tóxicas del organismo', desintoxicante).
+descripcionEfecto('Expulsa o mata parásitos intestinales', desparasitante).
+descripcionEfecto('Facilita la digestión o alivia molestias gástricas', digestivo).
+descripcionEfecto('Aumenta la producción y eliminación de orina', diuretico).
+descripcionEfecto('Estimula o regula el flujo menstrual', emenagogo).
+descripcionEfecto('Suaviza e hidrata la piel o mucosas', emoliente).
+descripcionEfecto('Aumenta energía o actividad fisiológica', estimulante).
+descripcionEfecto('Facilita la expulsión de moco respiratorio', expectorante).
+descripcionEfecto('Reduce la fiebre', febrifugo).
+descripcionEfecto('Detiene hemorragias o sangrados', hemostatico).
+descripcionEfecto('Protege el hígado de daños o toxinas', hepatoprotector).
+descripcionEfecto('Induce sueño o somnolencia', hipnotico).
+descripcionEfecto('Reduce niveles de glucosa en sangre', hipoglucemiante).
+descripcionEfecto('Reduce niveles de lípidos en sangre', hipolipemiante).
+descripcionEfecto('Disminuye la presión arterial', hipotensor).
+descripcionEfecto('Causa irritación local (usado con precaución)', irritante).
+descripcionEfecto('Estimula la evacuación intestinal', laxante).
+descripcionEfecto('Aporta nutrientes esenciales', nutritivo).
+descripcionEfecto('Usado para tratar afecciones oculares', oftalmico).
+descripcionEfecto('Mata o repele plagas (insectos, hongos)', pesticida).
+descripcionEfecto('Laxante fuerte que provoca evacuación intensa', purgante).
+descripcionEfecto('Produce sensación de frescor en piel o mucosas', refrescante).
+descripcionEfecto('Reduce tensión muscular o nerviosa', relajante).
+descripcionEfecto('Repone minerales en huesos o tejidos', remineralizante).
+descripcionEfecto('Aleja insectos o parásitos', repelente).
+descripcionEfecto('Aumenta flujo sanguíneo local (enrojecimiento)', rubefaciente).
+descripcionEfecto('Calma el sistema nervioso, induce relajación', sedante).
+descripcionEfecto('Estimula la sudoración', sudorifico).
+descripcionEfecto('Fortalece o revitaliza órganos o sistemas', tonico).
+descripcionEfecto('Fortalece cabello y cuero cabelludo', tonico_capilar).
+descripcionEfecto('Expulsa lombrices intestinales', vermifugo).
